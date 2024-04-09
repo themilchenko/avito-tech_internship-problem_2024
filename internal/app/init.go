@@ -14,6 +14,7 @@ import (
 	bannersUsecase "github.com/themilchenko/avito_internship-problem_2024/internal/banners/usecase"
 	"github.com/themilchenko/avito_internship-problem_2024/internal/config"
 	"github.com/themilchenko/avito_internship-problem_2024/internal/domain"
+	"github.com/themilchenko/avito_internship-problem_2024/internal/utils/crypto"
 	"github.com/themilchenko/avito_internship-problem_2024/pkg/logger"
 )
 
@@ -53,7 +54,7 @@ func (s *server) GetEchoInstance() *echo.Echo {
 }
 
 func (s *server) makeHandlers() {
-	s.authHandler = httpAuth.NewAuthHandler(s.authUsecase)
+	s.authHandler = httpAuth.NewAuthHandler(s.authUsecase, s.config.CookieSettings)
 	s.bannersHandler = httpBanners.NewBannersHandler(s.bannersUsecase)
 }
 
@@ -69,13 +70,11 @@ func (s *server) makeUsecases() {
 		s.server.Logger.Fatal(err)
 	}
 
-	s.authUsecase = authUsecase.NewAuthUsecase(authDB)
+	s.authUsecase = authUsecase.NewAuthUsecase(authDB, s.config.CookieSettings, crypto.HashPassword)
 	s.bannersUsecase = bannersUsecase.NewBannersUsecase(bannersDB, authDB)
 }
 
 func (s *server) makeRouter() {
-	s.server.Pre(middleware.AddTrailingSlash())
-
 	v1 := s.server.Group("/api")
 	v1.Use(logger.Middleware())
 	v1.Use(middleware.Secure())

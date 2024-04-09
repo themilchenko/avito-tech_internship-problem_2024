@@ -47,7 +47,7 @@ func generateCookie(userID uint64, c config.CookieSettings) gormModels.Session {
 	}
 }
 
-func (u *authUsecase) SignUp(user httpModels.User) (string, uint64, error) {
+func (u authUsecase) SignUp(user httpModels.User) (string, uint64, error) {
 	hash, err := u.hashCreator(user.Password)
 	if err != nil {
 		return "", 0, err
@@ -74,7 +74,7 @@ func (u *authUsecase) SignUp(user httpModels.User) (string, uint64, error) {
 	return sessionID, userID, nil
 }
 
-func (u *authUsecase) Login(user httpModels.User) (string, uint64, error) {
+func (u authUsecase) Login(user httpModels.User) (string, uint64, error) {
 	recUser, err := u.authRepository.GetUserByUsername(user.Username)
 	if err != nil {
 		switch err.Error() {
@@ -98,11 +98,11 @@ func (u *authUsecase) Login(user httpModels.User) (string, uint64, error) {
 	return sessionID, recUser.ID, nil
 }
 
-func (u *authUsecase) Logout(sessionID string) error {
+func (u authUsecase) Logout(sessionID string) error {
 	return u.authRepository.DeleteBySessionID(sessionID)
 }
 
-func (u *authUsecase) Auth(sessionID string) (uint64, error) {
+func (u authUsecase) Auth(sessionID string) (uint64, error) {
 	user, err := u.authRepository.GetUserBySessionID(sessionID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -113,7 +113,7 @@ func (u *authUsecase) Auth(sessionID string) (uint64, error) {
 	return user.ID, nil
 }
 
-func (u *authUsecase) GetUserBySessionID(sessionID string) (httpModels.User, error) {
+func (u authUsecase) GetUserBySessionID(sessionID string) (httpModels.User, error) {
 	recievedUser, err := u.authRepository.GetUserBySessionID(sessionID)
 	if err != nil {
 		return httpModels.User{}, err
