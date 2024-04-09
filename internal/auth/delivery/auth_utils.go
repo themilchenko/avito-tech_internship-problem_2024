@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	cookieName = "token"
+	CookieName = "token"
 )
 
 func (h AuthHandler) makeHTTPCookie(sessionID string) *http.Cookie {
 	return &http.Cookie{
-		Name:  cookieName,
+		Name:  CookieName,
 		Value: sessionID,
 		Expires: time.Now().
 			AddDate(int(h.cookieConfig.ExpireDate.Years),
@@ -27,7 +27,7 @@ func (h AuthHandler) makeHTTPCookie(sessionID string) *http.Cookie {
 }
 
 func GetCookie(c echo.Context) (*http.Cookie, error) {
-	cookie, err := c.Cookie(cookieName)
+	cookie, err := c.Cookie(CookieName)
 	if err != nil {
 		return nil, err
 	}
