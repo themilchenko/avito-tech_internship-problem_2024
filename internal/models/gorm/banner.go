@@ -1,6 +1,9 @@
 package gormModels
 
-import "gorm.io/gorm"
+import (
+	httpModels "github.com/themilchenko/avito_internship-problem_2024/internal/models/http"
+	"gorm.io/gorm"
+)
 
 type Banner struct {
 	gorm.Model
@@ -10,7 +13,7 @@ type Banner struct {
 }
 
 type BannerContent struct {
-	BannerID uint64
+	BannerID uint64 `gorm:"primarykey"`
 	Title    string
 	Text     string
 	URL      string
@@ -21,4 +24,12 @@ type BannerTagRelation struct {
 	BannerID uint64 `gorm:"uniqueIndex:idx_banner_tag"`
 	TagID    uint64 `gorm:"uniqueIndex:idx_banner_tag"`
 	Banner   Banner `gorm:"foreignKey:BannerID;constraint:OnDelete:CASCADE;"`
+}
+
+func (b BannerContent) ToHTTPModel() httpModels.BannerContent {
+	return httpModels.BannerContent{
+		Title: b.Title,
+		Text:  b.Text,
+		URL:   b.URL,
+	}
 }
