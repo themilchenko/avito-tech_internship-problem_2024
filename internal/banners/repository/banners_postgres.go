@@ -60,6 +60,7 @@ func (db *Postgres) CreateBanner(
 		return 0, err
 	}
 
+	bannerInfo.BannerID = recBanner.ID
 	if err := tx.Create(&bannerInfo).Error; err != nil {
 		return 0, err
 	}
@@ -107,7 +108,7 @@ func (db *Postgres) UpdateBannerTransactional(
 	}
 
 	for _, t := range tagsToDel {
-		if err := tx.Unscoped().Delete(&gormModels.BannerTagRelation{}).Where("tag_id = ?", t).Error; err != nil {
+		if err := tx.Unscoped().Delete(&gormModels.BannerTagRelation{}, "tag_id = ?", t).Error; err != nil {
 			return err
 		}
 	}
@@ -173,4 +174,12 @@ func (db *Postgres) GetBanners(
 		return []gormModels.BannerJoined{}, err
 	}
 	return recievedBanners, nil
+}
+
+func (db *Postgres) GetBannerByID(bannerID uint64) (gormModels.Banner, error) {
+	var resBanner gormModels.Banner
+	if err := db.DB.Model(&gormModels.Banner{}).Where("id = ?", bannerID).First(&resBanner).Error; err != nil {
+		return gormModels.Banner{}, err
+	}
+	return resBanner, nil
 }

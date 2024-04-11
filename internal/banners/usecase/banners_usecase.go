@@ -41,6 +41,9 @@ func (u bannersUsecase) GetBanners(
 ) ([]httpModels.Banner, error) {
 	banners, err := u.bannersRepository.GetBanners(tagID, featureID, limit, offset)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []httpModels.Banner{}, domain.ErrNotFound
+		}
 		return []httpModels.Banner{}, err
 	}
 
@@ -49,6 +52,9 @@ func (u bannersUsecase) GetBanners(
 		httpBanners[i] = b.ToHTTPModel()
 		relations, err := u.bannersRepository.GetBannerTags(httpBanners[i].BannerID)
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return []httpModels.Banner{}, domain.ErrNotFound
+			}
 			return nil, err
 		}
 
@@ -71,7 +77,6 @@ func (u bannersUsecase) CreateBanner(banner httpModels.Banner) (uint64, error) {
 	}
 
 	bannerID, err := u.bannersRepository.CreateBanner(gormModels.Banner{
-		ID:        banner.BannerID,
 		FeatureID: banner.FeatureID,
 	}, gormModels.BannerContent{
 		Title: banner.Content.Title,
@@ -86,6 +91,14 @@ func (u bannersUsecase) CreateBanner(banner httpModels.Banner) (uint64, error) {
 }
 
 func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
+	_, err := u.bannersRepository.GetBannerByID(banner.BannerID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return domain.ErrNotFound
+		}
+		return err
+	}
+
 	tags, err := u.bannersRepository.GetBannerTags(banner.BannerID)
 	if err != nil {
 		return err
@@ -107,14 +120,20 @@ func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
 		tagIDs = append(tagIDs[:i], tagIDs[i+1:]...)
 	}
 
-	if err := u.bannersRepository.UpdateBannerTransactional(gormModels.Banner{
-		ID:        banner.BannerID,
-		FeatureID: banner.FeatureID,
-	}, gormModels.BannerContent{
-		Title: banner.Content.Title,
-		Text:  banner.Content.Text,
-		URL:   banner.Content.URL,
-	}, tagIDs, tagsToAdd); err != nil {
+	if err := u.bannersRepository.UpdateBannerTransactional(
+		gormModels.Banner{
+			ID:        banner.BannerID,
+			FeatureID: banner.FeatureID,
+			IsActive:  banner.IsActive,
+		}, gormModels.BannerContent{
+			BannerID: banner.BannerID,
+			Title:    banner.Content.Title,
+			Text:     banner.Content.Text,
+			URL:      banner.Content.URL,
+		},
+		tagIDs,
+		tagsToAdd,
+	); err != nil {
 		return err
 	}
 
@@ -122,5 +141,11 @@ func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
 }
 
 func (u bannersUsecase) DeleteBannerByID(bannerID uint64) error {
+	if _, err := u.bannersRepository.GetBannerByID(bannerID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return domain.ErrNotFound
+		}
+		return err
+	}
 	return u.bannersRepository.DeleteBanner(bannerID)
 }

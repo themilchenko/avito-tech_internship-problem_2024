@@ -1,6 +1,7 @@
 package httpBanners
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -37,6 +38,9 @@ func (h BannersHandler) GetUserBanner(c echo.Context) error {
 
 	usrBanner, err := h.bannersUsecase.GetUserBanner(tagID, featureID, useLastVersion)
 	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -66,6 +70,9 @@ func (h BannersHandler) GetBanners(c echo.Context) error {
 
 	banners, err := h.bannersUsecase.GetBanners(tagID, featureID, limit, offset)
 	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -99,6 +106,9 @@ func (h BannersHandler) PatchBanner(c echo.Context) error {
 	recievedBanner.BannerID = bannerID
 
 	if err := h.bannersUsecase.UpdateBannerByID(recievedBanner); err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -112,6 +122,9 @@ func (h BannersHandler) DeleteBanner(c echo.Context) error {
 	}
 
 	if err := h.bannersUsecase.DeleteBannerByID(bannerID); err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	return c.NoContent(http.StatusNoContent)
