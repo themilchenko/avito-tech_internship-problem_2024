@@ -26,10 +26,26 @@ type BannerTagRelation struct {
 	Banner   Banner `gorm:"foreignKey:BannerID;constraint:OnDelete:CASCADE;"`
 }
 
+type BannerJoined struct {
+	Banner
+	BannerContent
+}
+
 func (b BannerContent) ToHTTPModel() httpModels.BannerContent {
 	return httpModels.BannerContent{
 		Title: b.Title,
 		Text:  b.Text,
 		URL:   b.URL,
+	}
+}
+
+func (bj BannerJoined) ToHTTPModel() httpModels.Banner {
+	return httpModels.Banner{
+		BannerID:  bj.ID,
+		FeatureID: bj.FeatureID,
+		IsActive:  bj.IsActive,
+		Content:   bj.BannerContent.ToHTTPModel(),
+		CreatedAt: bj.CreatedAt,
+		UpdatedAt: bj.UpdatedAt,
 	}
 }

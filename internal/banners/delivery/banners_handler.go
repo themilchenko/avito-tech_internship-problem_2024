@@ -114,5 +114,5 @@ func (h BannersHandler) DeleteBanner(c echo.Context) error {
 	if err := h.bannersUsecase.DeleteBannerByID(bannerID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	return c.JSON(http.StatusNoContent, httpModels.EmptyStruct{})
+	return c.NoContent(http.StatusNoContent)
 }

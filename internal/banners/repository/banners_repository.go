@@ -1,10 +1,14 @@
 package bannersRepository
 
 import (
+	"log"
+	"os"
+	"time"
+
 	gormModels "github.com/themilchenko/avito_internship-problem_2024/internal/models/gorm"
-	httpModels "github.com/themilchenko/avito_internship-problem_2024/internal/models/http"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Postgres struct {
@@ -12,7 +16,18 @@ type Postgres struct {
 }
 
 func NewPostgres(url string) (*Postgres, error) {
-	db, err := gorm.Open(postgres.Open(url), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(url), &gorm.Config{
+		Logger: logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags),
+			logger.Config{
+				SlowThreshold:             time.Second,
+				LogLevel:                  logger.Info,
+				IgnoreRecordNotFoundError: false,
+				ParameterizedQueries:      true,
+				Colorful:                  false,
+			},
+		),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -45,12 +60,13 @@ func (db *Postgres) CreateBanner(
 		return 0, err
 	}
 
-	if err := tx.Create(bannerInfo).Error; err != nil {
+	if err := tx.Create(&bannerInfo).Error; err != nil {
 		return 0, err
 	}
 
 	for _, tag := range bannerTag {
-		if err := tx.Create(tag).Error; err != nil {
+		tag.BannerID = recBanner.ID
+		if err := tx.Create(&tag).Error; err != nil {
 			return 0, err
 		}
 	}
@@ -117,13 +133,13 @@ func (db *Postgres) DeleteBanner(bannerID uint64) error {
 	return db.DB.Unscoped().Delete(&gormModels.Banner{}, "id = ?", bannerID).Error
 }
 
-func (db *Postgres) GetBannerTags(bannerID uint64) ([]uint64, error) {
-	var recievedTags []uint64
+func (db *Postgres) GetBannerTags(bannerID uint64) ([]gormModels.BannerTagRelation, error) {
+	recievedTags := make([]gormModels.BannerTagRelation, 0)
 	if err := db.DB.Model(&gormModels.BannerTagRelation{}).
 		Where("banner_id = ?", bannerID).
 		Scan(&recievedTags).
 		Error; err != nil {
-		return []uint64{}, err
+		return []gormModels.BannerTagRelation{}, err
 	}
 	return recievedTags, nil
 }
@@ -133,8 +149,8 @@ func (db *Postgres) GetUserBanner(tagID, featureID uint64) (gormModels.BannerCon
 	if err := db.DB.Model(&gormModels.Banner{}).
 		InnerJoins("JOIN banner_contents ON banners.id = banner_contents.banner_id").
 		InnerJoins("JOIN banner_tag_relations ON banners.id = banner_tag_relations.banner_id").
-		Select("banner.id, banner_contents.title, banner_contents.text, banner_contents.url").
-		Where("banners.featureID = ? AND banner_tag_relations.tag_id = ?", featureID, tagID).
+		Select("banners.id, banner_contents.title, banner_contents.text, banner_contents.url").
+		Where("banners.feature_id = ? AND banner_tag_relations.tag_id = ?", featureID, tagID).
 		First(&recievedUsrBanner).Error; err != nil {
 		return gormModels.BannerContent{}, err
 	}
@@ -143,18 +159,18 @@ func (db *Postgres) GetUserBanner(tagID, featureID uint64) (gormModels.BannerCon
 
 func (db *Postgres) GetBanners(
 	tagID, featureID, limit, offset uint64,
-) ([]httpModels.Banner, error) {
-	var recievedBanners []httpModels.Banner
+) ([]gormModels.BannerJoined, error) {
+	var recievedBanners []gormModels.BannerJoined
 	if err := db.DB.Model(&gormModels.Banner{}).
 		InnerJoins("JOIN banner_contents ON banners.id = banner_contents.banner_id").
 		InnerJoins("JOIN banner_tag_relations ON banners.id = banner_tag_relations.banner_id").
-		Select("banner.id, banner.feature_id, banner.is_active, banner_contents.title, banner_contents.text, banner_contents.url").
-		Where("banners.featureID = ? AND banner_tag_relations.tag_id = ?", featureID, tagID).
-		Find(&recievedBanners).
+		Select("banners.id, banners.feature_id, banners.is_active, banner_contents.title, banner_contents.text, banner_contents.url").
+		Where("banners.feature_id = ? AND banner_tag_relations.tag_id = ?", featureID, tagID).
 		Limit(int(limit)).
-		Offset(int(offset)).
+		Offset(int(offset - 1)).
+		Find(&recievedBanners).
 		Error; err != nil {
-		return []httpModels.Banner{}, err
+		return []gormModels.BannerJoined{}, err
 	}
 	return recievedBanners, nil
 }

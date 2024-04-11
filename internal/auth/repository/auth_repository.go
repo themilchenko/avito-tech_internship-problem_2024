@@ -1,9 +1,14 @@
 package authRepository
 
 import (
+	"log"
+	"os"
+	"time"
+
 	gormModels "github.com/themilchenko/avito_internship-problem_2024/internal/models/gorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Postgres struct {
@@ -11,7 +16,18 @@ type Postgres struct {
 }
 
 func NewPostgres(url string) (*Postgres, error) {
-	db, err := gorm.Open(postgres.Open(url), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(url), &gorm.Config{
+		Logger: logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags),
+			logger.Config{
+				SlowThreshold:             time.Second,
+				LogLevel:                  logger.Info,
+				IgnoreRecordNotFoundError: false,
+				ParameterizedQueries:      true,
+				Colorful:                  false,
+			},
+		),
+	})
 	if err != nil {
 		return nil, err
 	}

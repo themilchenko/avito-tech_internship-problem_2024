@@ -90,7 +90,7 @@ func (s *server) makeRouter() {
 	b.GET("", s.bannersHandler.GetBanners)
 	b.POST("", s.bannersHandler.CreateBanner)
 
-	bid := v1.Group("/banner/:id", s.authMiddleware.AdminRequiured)
+	bid := b.Group("/:id")
 	bid.PATCH("", s.bannersHandler.PatchBanner)
 	bid.DELETE("", s.bannersHandler.DeleteBanner)
 }

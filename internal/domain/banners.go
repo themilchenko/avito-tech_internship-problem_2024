@@ -28,8 +28,8 @@ type BannersRepository interface {
 	) error
 	DeleteTagByID(tagID uint64) error
 	CreateTag(tag gormModels.BannerTagRelation) error
-	GetBannerTags(bannerID uint64) ([]uint64, error)
+	GetBannerTags(bannerID uint64) ([]gormModels.BannerTagRelation, error)
 	DeleteBanner(bannerID uint64) error
 	GetUserBanner(tagID, featureID uint64) (gormModels.BannerContent, error)
-	GetBanners(tagID, featureID, limit, offset uint64) ([]httpModels.Banner, error)
+	GetBanners(tagID, featureID, limit, offset uint64) ([]gormModels.BannerJoined, error)
 }

@@ -2,7 +2,6 @@ package bannersUsecase
 
 import (
 	"errors"
-	"go/token"
 	"slices"
 
 	"github.com/themilchenko/avito_internship-problem_2024/internal/domain"
@@ -45,13 +44,21 @@ func (u bannersUsecase) GetBanners(
 		return []httpModels.Banner{}, err
 	}
 
-	for _, b := range banners {
-		b.TagsIDs, err = u.bannersRepository.GetBannerTags(b.BannerID)
+	httpBanners := make([]httpModels.Banner, len(banners))
+	for i, b := range banners {
+		httpBanners[i] = b.ToHTTPModel()
+		relations, err := u.bannersRepository.GetBannerTags(httpBanners[i].BannerID)
 		if err != nil {
 			return nil, err
 		}
+
+		httpBanners[i].TagsIDs = make([]uint64, len(relations))
+		for j, r := range relations {
+			httpBanners[i].TagsIDs[j] = r.TagID
+		}
 	}
-	return banners, nil
+
+	return httpBanners, nil
 }
 
 func (u bannersUsecase) CreateBanner(banner httpModels.Banner) (uint64, error) {
@@ -84,15 +91,20 @@ func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
 		return err
 	}
 
+	tagIDs := make([]uint64, len(tags))
+	for i, t := range tags {
+		tagIDs[i] = t.TagID
+	}
+
 	tagsToAdd := make([]uint64, 0)
 	for _, t := range banner.TagsIDs {
 		var i int
-		if i = slices.Index(tags, t); i == -1 {
+		if i = slices.Index(tagIDs, t); i == -1 {
 			tagsToAdd = append(tagsToAdd, t)
 			continue
 		}
 
-		tags = append(tags[:i], tags[i+1:]...)
+		tagIDs = append(tagIDs[:i], tagIDs[i+1:]...)
 	}
 
 	if err := u.bannersRepository.UpdateBannerTransactional(gormModels.Banner{
@@ -102,7 +114,7 @@ func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
 		Title: banner.Content.Title,
 		Text:  banner.Content.Text,
 		URL:   banner.Content.URL,
-	}, tags, tagsToAdd); err != nil {
+	}, tagIDs, tagsToAdd); err != nil {
 		return err
 	}
 
@@ -110,5 +122,5 @@ func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
 }
 
 func (u bannersUsecase) DeleteBannerByID(bannerID uint64) error {
-	return u.DeleteBannerByID(bannerID)
+	return u.bannersRepository.DeleteBanner(bannerID)
 }
