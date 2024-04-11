@@ -83,6 +83,16 @@ func (s *server) makeRouter() {
 	v1.POST("/signup", s.authHandler.SignUp)
 	v1.DELETE("/logout", s.authHandler.Logout, s.authMiddleware.LoginRequired)
 	v1.GET("/auth", s.authHandler.Auth)
+
+	v1.GET("/user_banner", s.bannersHandler.GetUserBanner, s.authMiddleware.LoginRequired)
+
+	b := v1.Group("/banner", s.authMiddleware.AdminRequiured)
+	b.GET("", s.bannersHandler.GetBanners)
+	b.POST("", s.bannersHandler.CreateBanner)
+
+	bid := v1.Group("/banner/:id", s.authMiddleware.AdminRequiured)
+	bid.PATCH("", s.bannersHandler.PatchBanner)
+	bid.DELETE("", s.bannersHandler.DeleteBanner)
 }
 
 func (s *server) makeMiddlewares() {

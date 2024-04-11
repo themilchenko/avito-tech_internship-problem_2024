@@ -2,6 +2,8 @@ package bannersUsecase
 
 import (
 	"errors"
+	"go/token"
+	"slices"
 
 	"github.com/themilchenko/avito_internship-problem_2024/internal/domain"
 	gormModels "github.com/themilchenko/avito_internship-problem_2024/internal/models/gorm"
@@ -21,7 +23,10 @@ func NewBannersUsecase(b domain.BannersRepository, a domain.AuthRepository) bann
 	}
 }
 
-func (u bannersUsecase) GetUserBanner(tagID, featureID uint64) (httpModels.BannerContent, error) {
+func (u bannersUsecase) GetUserBanner(
+	tagID, featureID uint64,
+	useLastVersion bool,
+) (httpModels.BannerContent, error) {
 	bannerContent, err := u.bannersRepository.GetUserBanner(tagID, featureID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -74,17 +79,36 @@ func (u bannersUsecase) CreateBanner(banner httpModels.Banner) (uint64, error) {
 }
 
 func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
-	u.bannersRepository.UpdateBannerTransactional(gormModels.Banner{
+	tags, err := u.bannersRepository.GetBannerTags(banner.BannerID)
+	if err != nil {
+		return err
+	}
+
+	tagsToAdd := make([]uint64, 0)
+	for _, t := range banner.TagsIDs {
+		var i int
+		if i = slices.Index(tags, t); i == -1 {
+			tagsToAdd = append(tagsToAdd, t)
+			continue
+		}
+
+		tags = append(tags[:i], tags[i+1:]...)
+	}
+
+	if err := u.bannersRepository.UpdateBannerTransactional(gormModels.Banner{
 		ID:        banner.BannerID,
 		FeatureID: banner.FeatureID,
 	}, gormModels.BannerContent{
 		Title: banner.Content.Title,
 		Text:  banner.Content.Text,
 		URL:   banner.Content.URL,
-	})
+	}, tags, tagsToAdd); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (u bannersUsecase) DeleteBannerByID(bannerID uint64) error {
-	return nil
+	return u.DeleteBannerByID(bannerID)
 }

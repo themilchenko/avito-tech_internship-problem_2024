@@ -2,6 +2,10 @@ package httpModels
 
 import "time"
 
+type BannerID struct {
+	ID uint64 `json:"banner_id"`
+}
+
 type BannerContent struct {
 	Title string `json:"title"`
 	Text  string `json:"text"`

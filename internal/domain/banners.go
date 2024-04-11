@@ -6,7 +6,7 @@ import (
 )
 
 type BannersUsecase interface {
-	GetUserBanner(tagID, featureID uint64) (httpModels.BannerContent, error)
+	GetUserBanner(tagID, featureID uint64, useLastVersion bool) (httpModels.BannerContent, error)
 	GetBanners(tagID, featureID, limit, offset uint64) ([]httpModels.Banner, error)
 	CreateBanner(banner httpModels.Banner) (uint64, error)
 	UpdateBannerByID(banner httpModels.Banner) error
