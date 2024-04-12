@@ -11,10 +11,6 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-const (
-	space = " "
-)
-
 type Postgres struct {
 	DB *gorm.DB
 
@@ -177,7 +173,7 @@ func (db *Postgres) GetBanners(
 	}
 	if featureID != 0 {
 		if len(whereCondition) != 0 {
-			whereCondition += space + "banners.feature_id = ?"
+			whereCondition += " AND banners.feature_id = ?"
 		} else {
 			whereCondition += "banners.feature_id = ?"
 		}
@@ -213,4 +209,16 @@ func (db *Postgres) GetBannerByID(bannerID uint64) (gormModels.Banner, error) {
 		return gormModels.Banner{}, err
 	}
 	return resBanner, nil
+}
+
+func (db *Postgres) GetBannerByFeatureAndTag(featureID, tagID uint64) (gormModels.Banner, error) {
+	var recievedBanner gormModels.Banner
+	if err := db.DB.Model(&gormModels.Banner{}).Distinct().
+		InnerJoins("JOIN banner_tag_relations ON banners.id = banner_tag_relations.banner_id").
+		Select("banners.*").
+		Where("banners.feature_id = ? AND banner_tag_relations.tag_id = ?", featureID, tagID).
+		First(&recievedBanner).Error; err != nil {
+		return gormModels.Banner{}, err
+	}
+	return recievedBanner, nil
 }

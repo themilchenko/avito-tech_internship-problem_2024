@@ -136,8 +136,7 @@ func (u bannersUsecase) CreateBanner(banner httpModels.Banner) (uint64, error) {
 }
 
 func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
-	oldBanner, err := u.bannersRepository.GetBannerByID(banner.BannerID)
-	if err != nil {
+	if _, err := u.bannersRepository.GetBannerByID(banner.BannerID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return domain.ErrNotFound
 		}
@@ -193,4 +192,7 @@ func (u bannersUsecase) DeleteBannerByID(bannerID uint64) error {
 		return err
 	}
 	return u.bannersRepository.DeleteBanner(bannerID)
+}
+
+func (u bannersUsecase) GetBannerIDByFeatureAndTag(featureID, tagID uint64) (uint64, error) {
 }

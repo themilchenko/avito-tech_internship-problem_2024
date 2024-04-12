@@ -56,7 +56,7 @@ func (s *server) GetEchoInstance() *echo.Echo {
 
 func (s *server) makeHandlers() {
 	s.authHandler = httpAuth.NewAuthHandler(s.authUsecase, s.config.CookieSettings)
-	s.bannersHandler = httpBanners.NewBannersHandler(s.bannersUsecase)
+	s.bannersHandler = httpBanners.NewBannersHandler(s.bannersUsecase, s.authUsecase)
 }
 
 func (s *server) makeUsecases() {
@@ -109,7 +109,7 @@ func (s *server) makeRouter() {
 }
 
 func (s *server) makeMiddlewares() {
-	s.authMiddleware = authMiddleware.NewAuthMiddleware(s.authUsecase)
+	s.authMiddleware = authMiddleware.NewAuthMiddleware(s.authUsecase, s.bannersUsecase)
 }
 
 func (s *server) makeEchoLogger() {

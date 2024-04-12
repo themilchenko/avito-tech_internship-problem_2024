@@ -33,6 +33,7 @@ type BannersRepository interface {
 	GetUserBanner(tagID, featureID uint64) (gormModels.BannerContent, error)
 	GetBanners(tagID, featureID, limit, offset uint64) ([]gormModels.BannerJoined, error)
 	GetBannerByID(bannerID uint64) (gormModels.Banner, error)
+	GetBannerByFeatureAndTag(featureID, tagID uint64) (gormModels.Banner, error)
 }
 
 type BannersCache interface {

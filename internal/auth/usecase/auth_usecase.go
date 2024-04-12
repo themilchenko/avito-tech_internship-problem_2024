@@ -116,6 +116,9 @@ func (u authUsecase) Auth(sessionID string) (uint64, error) {
 func (u authUsecase) GetUserBySessionID(sessionID string) (httpModels.User, error) {
 	recievedUser, err := u.authRepository.GetUserBySessionID(sessionID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return httpModels.User{}, domain.ErrNotFound
+		}
 		return httpModels.User{}, err
 	}
 	return recievedUser.ToHTTPModel(), nil
