@@ -36,5 +36,8 @@ type BannersRepository interface {
 }
 
 type BannersCache interface {
-	Get(tagID, featureID uint64) error
+	Get(tagID, featureID uint64) (httpModels.BannerContent, error)
+	Add(tagID, featureID uint64, bannerContent httpModels.BannerContent) error
+	Delete(tagID, featureID uint64) error
+	DeleteByFeatureID(featureID uint64) error
 }

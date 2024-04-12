@@ -12,13 +12,13 @@ import (
 
 type bannersUsecase struct {
 	bannersRepository domain.BannersRepository
-	authRepository    domain.AuthRepository
+	bannersCache      domain.BannersCache
 }
 
-func NewBannersUsecase(b domain.BannersRepository, a domain.AuthRepository) bannersUsecase {
+func NewBannersUsecase(b domain.BannersRepository, c domain.BannersCache) bannersUsecase {
 	return bannersUsecase{
 		bannersRepository: b,
-		authRepository:    a,
+		bannersCache:      c,
 	}
 }
 
@@ -26,6 +26,17 @@ func (u bannersUsecase) GetUserBanner(
 	tagID, featureID uint64,
 	useLastVersion bool,
 ) (httpModels.BannerContent, error) {
+	if !useLastVersion {
+		bannerContent, err := u.bannersCache.Get(tagID, featureID)
+		if err != nil && err.Error() != domain.ErrRedisNotFound.Error() {
+			return httpModels.BannerContent{}, err
+		}
+		if err == nil {
+			return bannerContent, nil
+		}
+	}
+
+	// Go to postgres to get actual data
 	bannerContent, err := u.bannersRepository.GetUserBanner(tagID, featureID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -33,6 +44,33 @@ func (u bannersUsecase) GetUserBanner(
 		}
 		return httpModels.BannerContent{}, domain.ErrInternal
 	}
+
+	// Check existion in cache
+	tags, err := u.bannersRepository.GetBannerTags(bannerContent.BannerID)
+	if err != nil {
+		return httpModels.BannerContent{}, err
+	}
+	noCacheData := true
+	for _, t := range tags {
+		_, err = u.bannersCache.Get(t.TagID, featureID)
+		if err != nil && err.Error() != domain.ErrRedisNotFound.Error() {
+			return httpModels.BannerContent{}, nil
+		}
+		if err.Error() == domain.ErrRedisNotFound.Error() {
+			noCacheData = false
+			break
+		}
+	}
+
+	// Only if in redis no data about this banner we push it
+	if noCacheData {
+		for _, t := range tags {
+			if err := u.bannersCache.Add(t.TagID, featureID, bannerContent.ToHTTPModel()); err != nil {
+				return httpModels.BannerContent{}, nil
+			}
+		}
+	}
+
 	return bannerContent.ToHTTPModel(), nil
 }
 
@@ -70,6 +108,13 @@ func (u bannersUsecase) GetBanners(
 func (u bannersUsecase) CreateBanner(banner httpModels.Banner) (uint64, error) {
 	bannerTags := make([]gormModels.BannerTagRelation, len(banner.TagsIDs))
 	for i, t := range banner.TagsIDs {
+		_, err := u.bannersRepository.GetUserBanner(t, banner.FeatureID)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, err
+		}
+		if err == nil {
+			return 0, domain.ErrBannerAlreadyExist
+		}
 		bannerTags[i] = gormModels.BannerTagRelation{
 			BannerID: banner.BannerID,
 			TagID:    t,
@@ -91,7 +136,7 @@ func (u bannersUsecase) CreateBanner(banner httpModels.Banner) (uint64, error) {
 }
 
 func (u bannersUsecase) UpdateBannerByID(banner httpModels.Banner) error {
-	_, err := u.bannersRepository.GetBannerByID(banner.BannerID)
+	oldBanner, err := u.bannersRepository.GetBannerByID(banner.BannerID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return domain.ErrNotFound

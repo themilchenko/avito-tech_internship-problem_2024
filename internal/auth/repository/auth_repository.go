@@ -21,7 +21,7 @@ func NewPostgres(url string) (*Postgres, error) {
 			log.New(os.Stdout, "\r\n", log.LstdFlags),
 			logger.Config{
 				SlowThreshold:             time.Second,
-				LogLevel:                  logger.Info,
+				LogLevel:                  logger.Warn,
 				IgnoreRecordNotFoundError: false,
 				ParameterizedQueries:      true,
 				Colorful:                  false,

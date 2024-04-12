@@ -21,13 +21,19 @@ type Config struct {
 		Address string `yaml:"address"`
 		Port    uint64 `yaml:"port"`
 	} `yaml:"server"`
-	Database struct {
+	Postgresql struct {
 		User    string `yaml:"user"`
 		DbName  string `yaml:"dbname"`
 		Host    string `yaml:"host"`
 		Port    uint64 `yaml:"port"`
 		SslMode string `yaml:"sslmode"`
-	} `yaml:"database"`
+		Limit   uint64 `yaml:"limit"`
+		Offset  uint64 `yaml:"offset"`
+	} `yaml:"postgresql"`
+	Redis struct {
+		Addr     string `yaml:"addr"`
+		Password string `yaml:"password"`
+	} `yaml:"redis"`
 	LoggerLvl      string `yaml:"logger_level"`
 	CookieSettings CookieSettings
 }
@@ -54,24 +60,40 @@ func New() *Config {
 			Address: address,
 			Port:    port,
 		}),
-		Database: struct {
+		Postgresql: struct {
 			User    string `yaml:"user"`
 			DbName  string `yaml:"dbname"`
 			Host    string `yaml:"host"`
 			Port    uint64 `yaml:"port"`
 			SslMode string `yaml:"sslmode"`
+			Limit   uint64 `yaml:"limit"`
+			Offset  uint64 `yaml:"offset"`
 		}(struct {
 			User    string
 			DbName  string
 			Host    string
 			Port    uint64
 			SslMode string
+			Limit   uint64
+			Offset  uint64
 		}{
 			User:    "postgres",
 			DbName:  "cyber_garden",
 			Host:    "localhost",
 			Port:    5432,
 			SslMode: "disable",
+			Limit:   10,
+			Offset:  1,
+		}),
+		Redis: struct {
+			Addr     string `yaml:"addr"`
+			Password string `yaml:"password"`
+		}(struct {
+			Addr     string
+			Password string
+		}{
+			Addr:     "localhost:6379",
+			Password: "qewrty",
 		}),
 		CookieSettings: struct {
 			Secure     bool `yaml:"secure"`
@@ -122,11 +144,11 @@ func (c *Config) Open(path string) error {
 func (c *Config) FormatDbAddr() string {
 	return fmt.Sprintf(
 		"host=%s user=%s password=admin dbname=%s port=%d sslmode=%s",
-		c.Database.Host,
-		c.Database.User,
-		c.Database.DbName,
-		c.Database.Port,
-		c.Database.SslMode,
+		c.Postgresql.Host,
+		c.Postgresql.User,
+		c.Postgresql.DbName,
+		c.Postgresql.Port,
+		c.Postgresql.SslMode,
 	)
 }
 

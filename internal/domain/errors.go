@@ -3,9 +3,12 @@ package domain
 import "errors"
 
 var (
-	ErrConflict               = errors.New("conflict")
-	ErrBadRequest             = errors.New("bad request")
-	ErrUserAlreadyExist       = errors.New("username is already exist")
+	ErrConflict           = errors.New("conflict")
+	ErrBadRequest         = errors.New("bad request")
+	ErrUserAlreadyExist   = errors.New("username is already exist")
+	ErrBannerAlreadyExist = errors.New(
+		"banner with this combination of tagID and featureID already exists",
+	)
 	ErrInvalidLoginOrPassword = errors.New("invalid login or password")
 	ErrForbidden              = errors.New("you are not supposed to be here")
 
@@ -31,3 +34,5 @@ var (
 	ErrUsername          = errors.New("username not exists")
 	ErrPasswordsNotEqual = errors.New("passwords not the same")
 )
+
+var ErrRedisNotFound = errors.New("redis: nil")

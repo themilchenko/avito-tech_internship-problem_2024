@@ -2,12 +2,18 @@ server:
   address: "localhost"
   port: 8080
 
-database:
+postgresql:
   user: "postgres"
   dbname: "banners_db"
   host: "localhost"
   port: 5432
   sslmode: "disable"
+  offset: 1
+  limit: 10
+
+redis:
+  addr: "localhost:6379"
+  password: "qwerty"
 
 logger_level: "debug"
 

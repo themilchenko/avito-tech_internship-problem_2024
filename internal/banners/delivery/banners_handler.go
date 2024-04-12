@@ -48,24 +48,41 @@ func (h BannersHandler) GetUserBanner(c echo.Context) error {
 }
 
 func (h BannersHandler) GetBanners(c echo.Context) error {
-	tagID, err := strconv.ParseUint(c.QueryParam("tag_id"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+	tagStr := c.QueryParam("tag_id")
+	var tagID uint64 = 0
+	var err error
+	if len(tagStr) != 0 {
+		tagID, err = strconv.ParseUint(tagStr, 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 	}
 
-	featureID, err := strconv.ParseUint(c.QueryParam("feature_id"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+	featureStr := c.QueryParam("feature_id")
+	var featureID uint64 = 0
+	if len(featureStr) != 0 {
+		featureID, err = strconv.ParseUint(featureStr, 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 	}
 
-	limit, err := strconv.ParseUint(c.QueryParam("limit"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+	limitStr := c.QueryParam("feature_id")
+	var limit uint64 = 0
+	if len(limitStr) != 0 {
+		limit, err = strconv.ParseUint(limitStr, 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 	}
 
-	offset, err := strconv.ParseUint(c.QueryParam("offset"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+	offsetStr := c.QueryParam("offset")
+	var offset uint64 = 0
+	if len(offsetStr) != 0 {
+		offset, err = strconv.ParseUint(offsetStr, 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 	}
 
 	banners, err := h.bannersUsecase.GetBanners(tagID, featureID, limit, offset)
@@ -87,6 +104,9 @@ func (h BannersHandler) CreateBanner(c echo.Context) error {
 
 	bannerID, err := h.bannersUsecase.CreateBanner(recievedBanner)
 	if err != nil {
+		if errors.Is(err, domain.ErrBannerAlreadyExist) {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 

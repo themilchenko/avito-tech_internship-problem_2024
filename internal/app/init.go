@@ -11,6 +11,7 @@ import (
 	authUsecase "github.com/themilchenko/avito_internship-problem_2024/internal/auth/usecase"
 	httpBanners "github.com/themilchenko/avito_internship-problem_2024/internal/banners/delivery"
 	bannersRepository "github.com/themilchenko/avito_internship-problem_2024/internal/banners/repository"
+	bannersCache "github.com/themilchenko/avito_internship-problem_2024/internal/banners/repository/banners_cache"
 	bannersUsecase "github.com/themilchenko/avito_internship-problem_2024/internal/banners/usecase"
 	"github.com/themilchenko/avito_internship-problem_2024/internal/config"
 	"github.com/themilchenko/avito_internship-problem_2024/internal/domain"
@@ -65,13 +66,25 @@ func (s *server) makeUsecases() {
 	if err != nil {
 		s.server.Logger.Fatal(err)
 	}
-	bannersDB, err := bannersRepository.NewPostgres(pgParams)
+	bannersDB, err := bannersRepository.NewPostgres(
+		pgParams,
+		s.config.Postgresql.Limit,
+		s.config.Postgresql.Offset,
+	)
+	if err != nil {
+		s.server.Logger.Fatal(err)
+	}
+
+	bannersCache, err := bannersCache.NewBannersCacheRedis(
+		s.config.Redis.Addr,
+		s.config.Redis.Password,
+	)
 	if err != nil {
 		s.server.Logger.Fatal(err)
 	}
 
 	s.authUsecase = authUsecase.NewAuthUsecase(authDB, s.config.CookieSettings, crypto.HashPassword)
-	s.bannersUsecase = bannersUsecase.NewBannersUsecase(bannersDB, authDB)
+	s.bannersUsecase = bannersUsecase.NewBannersUsecase(bannersDB, bannersCache)
 }
 
 func (s *server) makeRouter() {
