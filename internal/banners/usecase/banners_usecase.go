@@ -56,7 +56,7 @@ func (u bannersUsecase) GetUserBanner(
 		if err != nil && err.Error() != domain.ErrRedisNotFound.Error() {
 			return httpModels.BannerContent{}, nil
 		}
-		if err.Error() == domain.ErrRedisNotFound.Error() {
+		if err == nil {
 			noCacheData = false
 			break
 		}
@@ -194,5 +194,15 @@ func (u bannersUsecase) DeleteBannerByID(bannerID uint64) error {
 	return u.bannersRepository.DeleteBanner(bannerID)
 }
 
-func (u bannersUsecase) GetBannerIDByFeatureAndTag(featureID, tagID uint64) (uint64, error) {
+func (u bannersUsecase) GetBannerByFeatureAndTag(
+	featureID, tagID uint64,
+) (httpModels.Banner, error) {
+	banner, err := u.bannersRepository.GetBannerByFeatureAndTag(featureID, tagID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return httpModels.Banner{}, domain.ErrNotFound
+		}
+		return httpModels.Banner{}, err
+	}
+	return banner.ToHTTPModel(), nil
 }

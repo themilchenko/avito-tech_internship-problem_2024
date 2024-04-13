@@ -97,7 +97,12 @@ func (s *server) makeRouter() {
 	v1.DELETE("/logout", s.authHandler.Logout, s.authMiddleware.LoginRequired)
 	v1.GET("/auth", s.authHandler.Auth)
 
-	v1.GET("/user_banner", s.bannersHandler.GetUserBanner, s.authMiddleware.LoginRequired)
+	v1.GET(
+		"/user_banner",
+		s.bannersHandler.GetUserBanner,
+		s.authMiddleware.LoginRequired,
+		s.authMiddleware.ActiveBannerRestriction,
+	)
 
 	b := v1.Group("/banner", s.authMiddleware.AdminRequiured)
 	b.GET("", s.bannersHandler.GetBanners)

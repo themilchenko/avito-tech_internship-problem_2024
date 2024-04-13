@@ -9,6 +9,7 @@ var (
 	ErrBannerAlreadyExist = errors.New(
 		"banner with this combination of tagID and featureID already exists",
 	)
+	ErrBannerNotActive        = errors.New("this banner is not active right now")
 	ErrInvalidLoginOrPassword = errors.New("invalid login or password")
 	ErrForbidden              = errors.New("you are not supposed to be here")
 

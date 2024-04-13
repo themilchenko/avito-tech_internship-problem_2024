@@ -78,12 +78,19 @@ func (m *AuthMiddleware) ActiveBannerRestriction(next echo.HandlerFunc) echo.Han
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 
-		usrBanner, err := m.bannersUsecase.GetUserBanner(tagID, featureID, false)
+		banner, err := m.bannersUsecase.GetBannerByFeatureAndTag(featureID, tagID)
 		if err != nil {
 			if errors.Is(err, domain.ErrNotFound) {
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
+
+		if !banner.IsActive {
+			if user.Role != "admin" {
+				return echo.NewHTTPError(http.StatusForbidden, domain.ErrBannerNotActive)
+			}
+		}
+
+		return next(c)
 	}
 }

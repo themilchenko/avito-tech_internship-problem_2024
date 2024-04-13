@@ -49,3 +49,13 @@ func (bj BannerJoined) ToHTTPModel() httpModels.Banner {
 		UpdatedAt: bj.UpdatedAt,
 	}
 }
+
+func (b Banner) ToHTTPModel() httpModels.Banner {
+	return httpModels.Banner{
+		BannerID:  b.ID,
+		FeatureID: b.FeatureID,
+		IsActive:  b.IsActive,
+		CreatedAt: b.CreatedAt,
+		UpdatedAt: b.CreatedAt,
+	}
+}

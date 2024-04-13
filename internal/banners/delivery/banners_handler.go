@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	httpAuth "github.com/themilchenko/avito_internship-problem_2024/internal/auth/delivery"
 	"github.com/themilchenko/avito_internship-problem_2024/internal/domain"
 	httpModels "github.com/themilchenko/avito_internship-problem_2024/internal/models/http"
 )
@@ -39,17 +38,6 @@ func (h BannersHandler) GetUserBanner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	// cookie, err := httpAuth.GetCookie(c)
-	// if err != nil {
-	// 	return echo.NewHTTPError(http.StatusUnauthorized, domain.ErrNoSession)
-	// }
-	//  user, err := h.authUsecase.GetUserBySessionID(cookie.Value)
-	//  if err != nil {
-	//    if errors.Is(err, domain.ErrNotFound)
-	//    return err
-	//  }
-	//
-	//
 	usrBanner, err := h.bannersUsecase.GetUserBanner(tagID, featureID, useLastVersion)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {

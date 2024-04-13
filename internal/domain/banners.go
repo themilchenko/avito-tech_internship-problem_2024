@@ -11,6 +11,7 @@ type BannersUsecase interface {
 	CreateBanner(banner httpModels.Banner) (uint64, error)
 	UpdateBannerByID(banner httpModels.Banner) error
 	DeleteBannerByID(bannerID uint64) error
+	GetBannerByFeatureAndTag(featureID, tagID uint64) (httpModels.Banner, error)
 }
 
 type BannersRepository interface {

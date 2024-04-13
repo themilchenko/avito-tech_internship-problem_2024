@@ -21,7 +21,7 @@ def create_banner(i, feature, tags):
         "is_active": True
     }
 
-    response = requests.post(create_banner_url, json=payload, cookies={"token":"5d73f225-aed5-4a73-a7ca-2749266b1ced"})
+    response = requests.post(create_banner_url, json=payload, cookies={"token":"438d439d-8c23-45b7-a23a-2237b549b5f1"})
 
     if response.status_code == 201:
         print(f"Banner with id {i} was successfully created.")
