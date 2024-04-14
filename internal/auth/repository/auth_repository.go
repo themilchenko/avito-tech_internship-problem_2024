@@ -75,9 +75,7 @@ func (db *Postgres) DeleteBySessionID(sessionID string) error {
 
 func (db *Postgres) GetUserByUsername(username string) (gormModels.User, error) {
 	var recievedUser gormModels.User
-	if err := db.DB.Model(&gormModels.User{
-		Username: username,
-	}).Scan(&recievedUser).Error; err != nil {
+	if err := db.DB.Model(&gormModels.User{}).Where("username = ?", username).First(&recievedUser).Error; err != nil {
 		return gormModels.User{}, err
 	}
 	return recievedUser, nil

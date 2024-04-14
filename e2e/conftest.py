@@ -1,6 +1,15 @@
 import pytest
-from utils.api_helpers import setup_api_client
 
-@pytest.fixture
-def api_client():
-    return setup_api_client()
+BASE_URL = "http://127.0.0.1:8081/api"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def init():
+    # yield
+    pass
+
+
+# @pytest.fixture(autouse=True)
+# def destruct():
+#     f = open('test.txt', 'a')
+#     f.close()
