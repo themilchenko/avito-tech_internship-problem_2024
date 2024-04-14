@@ -66,7 +66,7 @@ func (u bannersUsecase) GetUserBanner(
 	if noCacheData {
 		for _, t := range tags {
 			if err := u.bannersCache.Add(t.TagID, featureID, bannerContent.ToHTTPModel()); err != nil {
-				return httpModels.BannerContent{}, nil
+				return httpModels.BannerContent{}, err
 			}
 		}
 	}

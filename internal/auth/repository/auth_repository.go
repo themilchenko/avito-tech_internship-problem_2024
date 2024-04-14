@@ -32,10 +32,12 @@ func NewPostgres(url string) (*Postgres, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(
+	if err := db.AutoMigrate(
 		&gormModels.User{},
 		&gormModels.Session{},
-	)
+	); err != nil {
+		return nil, err
+	}
 
 	return &Postgres{
 		DB: db,

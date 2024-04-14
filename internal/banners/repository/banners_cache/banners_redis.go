@@ -10,6 +10,10 @@ import (
 	httpModels "github.com/themilchenko/avito_internship-problem_2024/internal/models/http"
 )
 
+const (
+	minToDelete = 10
+)
+
 type BannersCacheRedis struct {
 	cache *redis.Client
 }
@@ -39,7 +43,7 @@ func (c *BannersCacheRedis) Get(tagID, featureID uint64) (httpModels.BannerConte
 
 	var resContent httpModels.BannerContent
 	if err := json.Unmarshal([]byte(bannerJSON), &resContent); err != nil {
-		return httpModels.BannerContent{}, nil
+		return httpModels.BannerContent{}, err
 	}
 	return resContent, nil
 }
@@ -54,7 +58,7 @@ func (c *BannersCacheRedis) Add(
 	}
 
 	// TODO: delete magic number
-	return c.cache.Set(context.Background(), fmt.Sprintf("%d:%d", featureID, tagID), string(bannerJSON), 10*time.Minute).
+	return c.cache.Set(context.Background(), fmt.Sprintf("%d:%d", featureID, tagID), string(bannerJSON), minToDelete*time.Minute).
 		Err()
 }
 

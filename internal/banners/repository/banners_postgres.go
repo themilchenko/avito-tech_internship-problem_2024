@@ -34,11 +34,13 @@ func NewPostgres(url string, l, o uint64) (*Postgres, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(
+	if err := db.AutoMigrate(
 		&gormModels.Banner{},
 		&gormModels.BannerContent{},
 		&gormModels.BannerTagRelation{},
-	)
+	); err != nil {
+		return nil, err
+	}
 
 	return &Postgres{
 		DB:     db,
@@ -91,7 +93,7 @@ func (db *Postgres) UpdateBannerInfo(bannerInfo gormModels.BannerContent) error 
 
 func (db *Postgres) UpdateBannerTransactional(
 	banner gormModels.Banner,
-	BannerContent gormModels.BannerContent,
+	bannerContent gormModels.BannerContent,
 	tagsToDel, tagsToAdd []uint64,
 ) error {
 	tx := db.DB.Begin()
@@ -105,8 +107,8 @@ func (db *Postgres) UpdateBannerTransactional(
 		return err
 	}
 
-	if err := tx.Model(&gormModels.BannerContent{BannerID: BannerContent.BannerID}).
-		Updates(BannerContent).
+	if err := tx.Model(&gormModels.BannerContent{BannerID: bannerContent.BannerID}).
+		Updates(bannerContent).
 		Error; err != nil {
 		return err
 	}

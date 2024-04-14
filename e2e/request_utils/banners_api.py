@@ -26,7 +26,11 @@ class BannerSearchRequest:
 def get_banner_request(
     tag_id: int, feature_id: int, use_last_version: bool, token: Token
 ) -> requests.Response:
-    params = {"tag_id": tag_id, "feature_id": feature_id, "use_last_version": False}
+    params = {
+        "tag_id": tag_id,
+        "feature_id": feature_id,
+        "use_last_version": use_last_version,
+    }
     return requests.get(BASE_URL + "/user_banner", params=params, cookies=token.token)
 
 

@@ -9,11 +9,15 @@ import (
 )
 
 const (
-	address       = "localhost"
-	port          = 8080
-	loggerLevel   = "debug"
-	translateMode = false
-	envFile       = ".env"
+	address          = "localhost"
+	port             = 8080
+	loggerLevel      = "debug"
+	translateMode    = false
+	envFile          = ".env"
+	postgresPort     = 5432
+	defaultLimit     = 10
+	defaultOffset    = 0
+	expireCookieDays = 7
 )
 
 type Config struct {
@@ -80,10 +84,10 @@ func New() *Config {
 			User:    "postgres",
 			DbName:  "cyber_garden",
 			Host:    "localhost",
-			Port:    5432,
+			Port:    postgresPort,
 			SslMode: "disable",
-			Limit:   10,
-			Offset:  1,
+			Limit:   defaultLimit,
+			Offset:  defaultOffset,
 		}),
 		Redis: struct {
 			Addr     string `yaml:"addr"`
@@ -121,7 +125,7 @@ func New() *Config {
 			}{
 				Years:  0,
 				Months: 0,
-				Days:   7,
+				Days:   expireCookieDays,
 			},
 		}),
 	}
