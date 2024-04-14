@@ -33,6 +33,14 @@ docker-compose up -d
 python migrations/postgres_filling {url_до_API} {admin_token}
 ```
 
+## E2E тесты
+
+Для запуска тестов нужно прописать
+
+```sh
+pytest e2e/
+```
+
 ## Makefile
 
 Многие готовые сценарии уже обренуты в Makefile. Поэтому можно ознакомиться с ними, прописав:
