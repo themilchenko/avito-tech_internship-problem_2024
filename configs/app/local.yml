@@ -1,0 +1,26 @@
+server:
+  address: "localhost"
+  port: 8080
+
+postgresql:
+  user: "postgres"
+  dbname: "banners_db"
+  host: "localhost"
+  port: 5432
+  sslmode: "disable"
+  offset: 1
+  limit: 10
+
+redis:
+  addr: "localhost:6379"
+  password: "qwerty"
+
+logger_level: "debug"
+
+cookie_settings:
+  secure: "true"
+  http_only: "true"
+  expire_date:
+    years: 0
+    months: 0
+    days: 7
