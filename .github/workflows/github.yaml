@@ -75,5 +75,5 @@ jobs:
             docker rm -f banners_service banners_postgresql banners_redis
 
             cd ~/banners_backend
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/banners_service:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/banners_service:latest
             docker compose up -d
