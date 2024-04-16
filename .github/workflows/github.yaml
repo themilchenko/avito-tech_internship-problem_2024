@@ -46,3 +46,34 @@ jobs:
           file: ./deployments/api/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/banners_service:latest
+  build_and_push:
+    needs:
+      - build_push_api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: copy files via ssh secrets
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE}}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "./docker-compose.yml, configs/"
+          target: "banners_backend"
+          rm: true
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE}}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker rm -f banners_service banners_postgresql banners_redis
+
+            cd ~/banners_backend
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/banners_service:latest
+            docker compose up -d

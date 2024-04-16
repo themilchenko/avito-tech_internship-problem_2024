@@ -5,7 +5,7 @@ server:
 postgresql:
   user: "postgres"
   dbname: "banners_db"
-  host: "postgres"
+  host: "banners_postgres"
   port: 5432
   sslmode: "disable"
   offset: 1
