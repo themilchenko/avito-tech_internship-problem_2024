@@ -88,7 +88,7 @@ func (s *server) makeUsecases() {
 }
 
 func (s *server) makeRouter() {
-	v1 := s.server.Group("/api")
+	v1 := s.server.Group("/api/v2")
 	v1.Use(logger.Middleware())
 	v1.Use(middleware.Secure())
 

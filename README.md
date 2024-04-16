@@ -2,7 +2,9 @@
 
 ## API
 
-Для поддерживания функционала с двумя ролями (токенами) было добавлено несколько методов в API. Их можно найти в [файле](https://drive.google.com/file/d/1QyiyX-Loq33jli2f-iuoQg4bFOUtoYR-/view?usp=sharing) докумментации Postman. Его можно скачать для импорта в приложении.
+:rocket: Деплой API доступен по пути: https://milchenko.online/api/v2
+
+Для поддерживания функционала с двумя ролями (токенами) было добавлено несколько методов в API. Их можно найти в [файле](https://drive.google.com/file/d/1QyiyX-Loq33jli2f-iuoQg4bFOUtoYR-/view?usp=sharing) или по [ссылке](https://www.postman.com/martian-eclipse-581372/workspace/bannersapi/collection/24084701-db52c204-fc41-4dde-a619-b3720ef0ad53?action=share&creator=24084701). Файл можно скачать для импорта в приложении.
 
 ## Как запустить проект
 
