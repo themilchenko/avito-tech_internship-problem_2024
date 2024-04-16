@@ -1,15 +1,10 @@
 import pytest
+from dotenv import load_dotenv
 
-BASE_URL = "http://127.0.0.1:8081/api"
+BASE_URL = "https://milchenko.online/api/v2"
 
 
 @pytest.fixture(scope="session", autouse=True)
 def init():
-    # yield
-    pass
+    load_dotenv()
 
-
-# @pytest.fixture(autouse=True)
-# def destruct():
-#     f = open('test.txt', 'a')
-#     f.close()

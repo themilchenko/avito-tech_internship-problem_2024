@@ -15,7 +15,7 @@ lint: ## Make linters
 
 .PHONY: e2e
 e2e: ## Make end-to-end tests
-	ADMIN_USERNAME=milchenko ADMIN_PASSWORD=qwerty USER_USERNAME=user USER_PASSWORD=qwerty pytest e2e/
+	pytest e2e/
 
 .PHONY: help
 help:
