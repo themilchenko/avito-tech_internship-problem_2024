@@ -43,8 +43,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          build-args: |
-            TOKEN_SECRET=${{ secrets.TOKEN_SECRET }}
           file: ./deployments/api/Dockerfile
           push: true
-          tags: milchenko/banners_service:latest         
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/banners_service:latest         
